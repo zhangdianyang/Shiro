@@ -14,6 +14,7 @@ import org.apache.activemq.ActiveMQConnection;
 public class ActiveMqUtil {
 	public static void senderMessage(String message) {
 		// 链接工厂
+
 		ConnectionFactory connectionFactory;
 		// 创建链接
 		Connection connection = null;
