@@ -120,11 +120,13 @@
 		</dependency>
 
 
+		<!-- https://mvnrepository.com/artifact/org.apache.solr/solr-solrj -->
 		<dependency>
-			<groupId>org.apache</groupId>
-			<artifactId>solr</artifactId>
-			<version>6.5.1</version>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-solrj</artifactId>
+			<version>6.6.0</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>commons-logging</groupId>
