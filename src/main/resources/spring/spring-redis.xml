@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:cache="http://www.springframework.org/schema/cache"  
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+ 	   http://www.springframework.org/schema/cache 
+ 	   http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<!-- <context:annotation-config /> -->
+	<!-- <context:component-scan base-package="test.redis" /> -->
+
+	<!-- list里面添加多个value标签 <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" 
+		> <property name="locations"> <list> <value>classpath:properties/*.properties</value> 
+		</list> </property> </bean> -->
+
+	<!-- ignore-resource-not-found="true"的作用是如果有多个properties文件，可以忽略某个配置文件中没有的值 -->
+	<context:property-placeholder location="classpath:redis.properties"
+		ignore-unresolvable="true" />
+
+	<!-- <cache:annotation-driven cache-manager="cacheManager"
+		proxy-target-class="true" /> -->
+
+
+	<!-- jedis 配置 -->
+
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxIdle" value="${redis.maxIdle}" />
+		<property name="maxTotal" value="${redis.maxActive}" />
+		<property name="maxWaitMillis" value="${redis.maxWait}" />
+		<property name="testOnBorrow" value="${redis.testOnBorrow}" />
+	</bean>
+
+
+	<!-- redis服务器中心 ：使用JedisConnectionFactory -->
+	<bean id="connectionFactory"
+		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="poolConfig" ref="jedisPoolConfig" />
+		<property name="hostName" value="${redis.host}" />
+		<property name="port" value="${redis.port}" />
+		<property name="password" value="${redis.password}" />
+		<!-- <property name="timeout" value="${redis.timeout}" /> -->
+	</bean>
+	<!-- redis服务器中心 ：使用ShardedJedisPool -->
+	<!-- <bean id="sharedJedisPool" class="redis.clients.jedis.ShardedJedisPool"> 
+		<constructor-arg index="0" ref="jedisPoolConfig" /> <constructor-arg index="1"> 
+		<list> <bean class="redis.clients.jedis.JedisShardInfo"> <constructor-arg 
+		index="0" value="${redis.host}" /> <constructor-arg index="1" value="${redis.port}" 
+		/> <constructor-arg index="2" value="${redis.timeout}" /> </bean> </list> 
+		</constructor-arg> </bean> -->
+
+	<!-- spring提供的操作redis的模版函数 -->
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="keySerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+		<property name="hashKeySerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+		<property name="valueSerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+		</property>
+		<property name="hashValueSerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+		</property>
+	</bean>
+
+	<bean id="stringRedisSerializer"
+		class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+
+	<!-- 配置缓存 -->
+	<bean id="cacheManager" class="org.springframework.data.redis.cache.RedisCacheManager">
+		<constructor-arg ref="redisTemplate" />
+	</bean>
+
+</beans>
